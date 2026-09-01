@@ -5,23 +5,38 @@
   --rose:         #eda9b4;
   --ivory:        #f5f1e6;
   --muted:        #a9a3c9;
-  --glass:        rgba(245, 241, 230, 0.05);
   --glass-line:   rgba(232, 179, 76, 0.22);
   --serif: 'Fraunces', 'Iowan Old Style', serif;
   --sans: 'Work Sans', -apple-system, sans-serif;
 }
 
-*{ box-sizing: border-box; }
+*{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body{
   margin:0;
   padding:0;
-  height:100%;
+  min-height: 100svh;
   background: radial-gradient(120% 140% at 50% 0%, var(--night-plum) 0%, var(--night-deep) 55%, #06070f 100%);
+  background-attachment: fixed;
   color: var(--ivory);
   font-family: var(--sans);
   overflow-x:hidden;
+  touch-action: pan-y;
+  transition: background 1.2s ease;
 }
+
+/* per-theme background tint shifts, layered over the base gradient */
+body.theme-balloons   { background: radial-gradient(120% 140% at 50% 0%, #2a1a3d 0%, var(--night-deep) 55%, #06070f 100%); }
+body.theme-planes     { background: radial-gradient(120% 140% at 50% 0%, #12233d 0%, var(--night-deep) 55%, #05070f 100%); }
+body.theme-hourglass  { background: radial-gradient(120% 140% at 50% 0%, #241a30 0%, var(--night-deep) 55%, #060710 100%); }
+body.theme-rain       { background: radial-gradient(120% 140% at 50% 0%, #101a2e 0%, #0a0d1a 55%, #040509 100%); }
+body.theme-hearts     { background: radial-gradient(120% 140% at 50% 0%, #3a1530 0%, var(--night-deep) 55%, #06070f 100%); }
+body.theme-stars      { background: radial-gradient(120% 140% at 50% 0%, #141033 0%, #08091a 55%, #030309 100%); }
+body.theme-fireflies  { background: radial-gradient(120% 140% at 50% 0%, #17301f 0%, #0b1712 55%, #050a08 100%); }
+body.theme-petals     { background: radial-gradient(120% 140% at 50% 0%, #3a1622 0%, var(--night-deep) 55%, #06070f 100%); }
+body.theme-candle     { background: radial-gradient(120% 140% at 50% 0%, #33230f 0%, var(--night-deep) 55%, #06070f 100%); }
+body.theme-bloom      { background: radial-gradient(120% 140% at 50% 0%, #1a2f1f 0%, var(--night-deep) 55%, #06070f 100%); }
+body.theme-fireworks  { background: radial-gradient(120% 140% at 50% 0%, #2a1030 0%, #0a0a18 55%, #030308 100%); }
 
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
@@ -38,12 +53,15 @@ html, body{
 
 .dots{
   position: fixed;
-  top: 24px;
+  top: calc(env(safe-area-inset-top, 0px) + 16px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 7px;
+  gap: 6px;
   z-index: 5;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 90vw;
 }
 .dots span{
   width: 6px;
@@ -51,6 +69,7 @@ html, body{
   border-radius: 50%;
   background: rgba(245,241,230,0.18);
   transition: background 0.5s ease, transform 0.5s ease;
+  flex-shrink: 0;
 }
 .dots span.done{ background: var(--gold); }
 .dots span.current{ background: var(--rose); transform: scale(1.4); }
@@ -58,11 +77,11 @@ html, body{
 .stage{
   position: relative;
   z-index: 2;
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 90px 24px 60px;
+  padding: 76px 20px calc(env(safe-area-inset-bottom, 0px) + 40px);
 }
 
 .card{
@@ -82,33 +101,40 @@ html, body{
   font-size: 13px;
   letter-spacing: 0.02em;
   color: var(--muted);
-  margin-bottom: 18px;
-  font-weight: 400;
+  margin-bottom: 14px;
+  font-weight: 500;
 }
 
 .question{
   font-family: var(--serif);
   font-weight: 500;
-  font-size: clamp(26px, 4.2vw, 38px);
-  line-height: 1.25;
+  font-size: clamp(24px, 6vw, 36px);
+  line-height: 1.28;
   color: var(--ivory);
-  margin: 0 0 34px;
+  margin: 0 0 22px;
+}
+
+/* mini animated scene container, sits between question and buttons */
+.scene{
+  width: 100%;
+  max-width: 260px;
+  height: 130px;
+  margin: 0 auto 24px;
+  position: relative;
 }
 
 .answer{
   font-family: var(--serif);
   font-style: italic;
   font-weight: 300;
-  font-size: clamp(19px, 2.6vw, 23px);
-  line-height: 1.65;
+  font-size: clamp(18px, 4.6vw, 22px);
+  line-height: 1.6;
   color: var(--rose);
   max-width: 520px;
-  margin: 0 auto 40px;
+  margin: 0 auto 30px;
   opacity: 0;
 }
-.answer.show{
-  animation: fadeIn 1s ease both;
-}
+.answer.show{ animation: fadeIn 1s ease both; }
 @keyframes fadeIn{
   from{ opacity:0; transform: translateY(8px); }
   to{ opacity:1; transform: translateY(0); }
@@ -116,20 +142,23 @@ html, body{
 
 button{
   font-family: var(--sans);
-  font-size: 15px;
+  font-weight: 500;
+  font-size: 16px;
   letter-spacing: 0.01em;
   color: var(--night-deep);
   background: linear-gradient(135deg, var(--gold), var(--rose));
   border: none;
-  padding: 14px 30px;
+  padding: 15px 30px;
+  min-height: 50px;
   border-radius: 999px;
   cursor: pointer;
+  touch-action: manipulation;
   transition: transform 0.35s ease, box-shadow 0.35s ease;
   box-shadow: 0 8px 24px rgba(232,179,76,0.18);
 }
 button:hover{ transform: translateY(-2px); box-shadow: 0 12px 30px rgba(232,179,76,0.28); }
 button:focus-visible{ outline: 2px solid var(--ivory); outline-offset: 3px; }
-button:active{ transform: translateY(0); }
+button:active{ transform: translateY(0) scale(0.97); }
 
 button.ghost{
   background: transparent;
@@ -139,9 +168,39 @@ button.ghost{
 }
 button.ghost:hover{ color: var(--ivory); border-color: var(--gold); }
 
+/* the "wrong answer" decoy zone — gives the real button room to be chased */
+.decoy-zone{
+  position: relative;
+  width: 100%;
+  height: 74px;
+  margin: 0 auto 14px;
+  max-width: 380px;
+}
+.decoy-btn{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(245,241,230,0.06);
+  border: 1px solid rgba(245,241,230,0.18);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 400;
+  padding: 11px 20px;
+  min-height: 42px;
+  box-shadow: none;
+  transition: left 0.28s cubic-bezier(.34,1.56,.64,1), top 0.28s cubic-bezier(.34,1.56,.64,1), opacity 0.2s ease;
+}
+.decoy-btn:hover, .decoy-btn:active{ background: rgba(245,241,230,0.06); color: var(--muted); }
+
+.correct-btn{
+  display: block;
+  margin: 0 auto;
+}
+
 .hint{
-  margin-top: 18px;
-  font-size: 13px;
+  margin-top: 14px;
+  font-size: 12.5px;
   color: var(--muted);
   opacity: 0;
   animation: fadeIn 0.8s ease 0.4s both;
@@ -150,77 +209,180 @@ button.ghost:hover{ color: var(--ivory); border-color: var(--gold); }
 /* checklist step */
 .checklist{
   list-style: none;
-  margin: 0 0 36px;
+  margin: 0 0 30px;
   padding: 0;
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15px;
 }
 .checklist li{
   font-family: var(--serif);
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1.5;
   color: var(--ivory);
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: flex-start;
   opacity: 0;
   transform: translateX(-10px);
 }
-.checklist li.show{
-  animation: slideIn 0.7s ease both;
-}
-@keyframes slideIn{
-  to{ opacity: 1; transform: translateX(0); }
-}
+.checklist li.show{ animation: slideIn 0.7s ease both; }
+@keyframes slideIn{ to{ opacity: 1; transform: translateX(0); } }
 .checklist li::before{
   content: '';
-  min-width: 9px;
-  height: 9px;
+  min-width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--gold);
-  margin-top: 8px;
+  margin-top: 7px;
 }
 
 /* letter step */
 .letter{
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(18px, 2.3vw, 21px);
-  line-height: 1.85;
+  font-size: clamp(16.5px, 4.2vw, 20px);
+  line-height: 1.8;
   color: var(--ivory);
   text-align: left;
   max-width: 540px;
-  margin: 0 auto 34px;
+  margin: 0 auto 30px;
 }
-.letter p{ margin: 0 0 20px; }
+.letter p{ margin: 0 0 18px; }
 .signature{
   font-family: var(--serif);
   font-style: italic;
-  font-size: 22px;
+  font-size: 21px;
   color: var(--gold);
-  margin-top: 30px;
+  margin-top: 26px;
   display: block;
 }
 
-/* candle / final visual */
-.candle-wrap{
-  margin: 0 auto 30px;
-  width: 90px;
-  height: 90px;
-  position: relative;
+.final-title{
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(26px, 6.5vw, 40px);
+  color: var(--ivory);
+  margin: 0 0 16px;
 }
+
+.closing-note{
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--rose);
+  margin-top: 20px;
+}
+
+.replay{
+  margin-top: 36px;
+  font-size: 12px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  box-shadow: none;
+  text-decoration: underline;
+  padding: 4px;
+  cursor: pointer;
+  min-height: auto;
+}
+.replay:hover{ color: var(--ivory); }
+
+/* ===================== mini scene SVG animation classes ===================== */
+
+/* -- balloons: string sways, balloon drifts up slightly then settles -- */
+.sc-balloon{ animation: balloonBob 3.4s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes balloonBob{
+  0%,100%{ transform: translateY(0) rotate(-2deg); }
+  50%{ transform: translateY(-10px) rotate(2deg); }
+}
+.sc-balloon-string{ animation: stringSway 3.4s ease-in-out infinite; transform-origin: top center; }
+@keyframes stringSway{
+  0%,100%{ transform: rotate(-3deg); }
+  50%{ transform: rotate(3deg); }
+}
+
+/* -- paper plane: flies in an arc and loops -- */
+.sc-plane{ animation: planeFly 3.2s ease-in-out infinite; }
+@keyframes planeFly{
+  0%{ transform: translate(-70px,20px) rotate(-8deg); opacity:0; }
+  15%{ opacity:1; }
+  50%{ transform: translate(0,-16px) rotate(4deg); }
+  85%{ opacity:1; }
+  100%{ transform: translate(70px,20px) rotate(-8deg); opacity:0; }
+}
+
+/* -- hourglass: sand grains fall -- */
+.sc-grain{ animation: fallGrain 1.4s linear infinite; }
+@keyframes fallGrain{
+  0%{ transform: translateY(0); opacity: 0; }
+  10%{ opacity: 1; }
+  90%{ opacity: 1; }
+  100%{ transform: translateY(52px); opacity: 0; }
+}
+.sc-hourglass-body{ animation: hgTilt 4s ease-in-out infinite; transform-origin: 50% 50%; }
+@keyframes hgTilt{
+  0%,100%{ transform: rotate(0deg); }
+  50%{ transform: rotate(180deg); }
+}
+
+/* -- rain: umbrella tilts to shield, drops fall around -- */
+.sc-umbrella{ animation: umbrellaTilt 3s ease-in-out infinite; transform-origin: 50% 90%; }
+@keyframes umbrellaTilt{
+  0%,100%{ transform: rotate(-4deg); }
+  50%{ transform: rotate(4deg); }
+}
+.sc-drop{ animation: dropFall 1.6s linear infinite; }
+@keyframes dropFall{
+  0%{ transform: translateY(-10px); opacity: 0; }
+  20%{ opacity: 0.8; }
+  100%{ transform: translateY(90px); opacity: 0; }
+}
+
+/* -- hearts: little heart pulses & drifts -- */
+.sc-heart{ animation: heartDance 2.2s ease-in-out infinite; }
+@keyframes heartDance{
+  0%,100%{ transform: translateY(0) scale(1) rotate(0deg); }
+  25%{ transform: translateY(-8px) scale(1.08) rotate(-4deg); }
+  50%{ transform: translateY(0) scale(1) rotate(0deg); }
+  75%{ transform: translateY(-4px) scale(1.05) rotate(4deg); }
+}
+
+/* -- stars: reaching hand + twinkle -- */
+.sc-star{ animation: starTwinkle 1.8s ease-in-out infinite; }
+@keyframes starTwinkle{
+  0%,100%{ opacity: 0.5; transform: scale(0.9); }
+  50%{ opacity: 1; transform: scale(1.15); }
+}
+
+/* -- fireflies: glow drifting orbs around a jar -- */
+.sc-firefly{ animation: fireflyDrift 3s ease-in-out infinite; }
+@keyframes fireflyDrift{
+  0%,100%{ transform: translate(0,0); opacity: 0.5; }
+  50%{ transform: translate(6px,-14px); opacity: 1; }
+}
+
+/* -- petals: flower with petals plucking off one by one -- */
+.sc-petal{
+  transition: transform 1.1s cubic-bezier(.5,-0.2,.6,1.2), opacity 1.1s ease;
+  transform-origin: center;
+}
+.sc-petal.plucked{
+  opacity: 0;
+  transform: translate(var(--fx,40px), var(--fy,-50px)) rotate(160deg) scale(0.4);
+}
+
+/* -- candle: flame flicker -- */
 .flame{
   position: absolute;
   left: 50%;
   bottom: 58px;
-  width: 14px;
-  height: 22px;
+  width: 13px;
+  height: 20px;
   background: radial-gradient(circle at 50% 30%, #fff6d8, var(--gold) 60%, transparent 80%);
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
   transform: translateX(-50%);
-  filter: blur(0.2px);
   animation: flicker 2.4s ease-in-out infinite;
 }
 @keyframes flicker{
@@ -233,41 +395,30 @@ button.ghost:hover{ color: var(--ivory); border-color: var(--gold); }
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
-  height: 60px;
+  width: 18px;
+  height: 55px;
   background: linear-gradient(180deg, var(--ivory), #d8d0bd);
   border-radius: 3px;
 }
+.candle-wrap{ position: relative; width: 90px; height: 90px; margin: 0 auto; }
 
-.final-title{
-  font-family: var(--serif);
-  font-weight: 500;
-  font-size: clamp(28px, 4.5vw, 42px);
-  color: var(--ivory);
-  margin: 0 0 20px;
+/* -- bloom: flower grows taller / opens with each promise -- */
+.sc-bloom-flower{
+  transition: transform 0.6s cubic-bezier(.34,1.56,.64,1);
+  transform-origin: bottom center;
+}
+.sc-bloom-stem{
+  transition: height 0.6s ease;
 }
 
-.closing-note{
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 20px;
-  color: var(--rose);
-  margin-top: 26px;
+/* -- final: rose presented toward viewer, gentle wobble -- */
+.sc-rose{ animation: roseOffer 2.6s ease-in-out infinite; transform-origin: bottom center; }
+@keyframes roseOffer{
+  0%,100%{ transform: translateY(0) rotate(-3deg); }
+  50%{ transform: translateY(-6px) rotate(3deg); }
 }
 
-.replay{
-  margin-top: 42px;
-  font-size: 12px;
-  color: var(--muted);
-  background: none;
-  border: none;
-  box-shadow: none;
-  text-decoration: underline;
-  padding: 4px;
-  cursor: pointer;
-}
-.replay:hover{ color: var(--ivory); }
-
-@media (max-width: 480px){
-  .stage{ padding: 70px 18px 50px; }
+@media (max-width: 380px){
+  .stage{ padding: 66px 16px calc(env(safe-area-inset-bottom, 0px) + 34px); }
+  .scene{ height: 110px; }
 }
